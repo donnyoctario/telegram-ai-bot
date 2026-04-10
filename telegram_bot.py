@@ -46,6 +46,9 @@ Always format your answers:
 - DO NOT use tables
 - DO NOT use | symbols
 - Keep answers clean and easy to read
+- Use *bold* (not **)
+- Use - for bullet points
+- Avoid special characters that break formatting
 """
                 },
                 {"role": "user", "content": user_text}
@@ -57,8 +60,9 @@ Always format your answers:
         MAX_LENGTH = 4000
         for i in range(0, len(reply), MAX_LENGTH):
             await update.message.reply_text(
-                reply[i:i+MAX_LENGTH]
-            )
+                reply[i:i+MAX_LENGTH],
+                parse_mode="Markdown"
+        )
 
     except Exception as e:
         print("ERROR:", e)
