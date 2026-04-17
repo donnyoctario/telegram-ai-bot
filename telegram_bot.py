@@ -5,13 +5,12 @@ import os
 
 print("🚀 BOT STARTING...")
 
-# API GROQ
 client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 
-# MEMORY
+
 user_memory = {}
 
-# START COMMAND
+
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.message.from_user
     username = user.username
@@ -21,12 +20,11 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     else:
         name = user.first_name if user.first_name else "Teman"
 
-    # reset memory saat start
+
     user_memory[user.id] = []
 
     await update.message.reply_text(f"Halo {name}! Saya AI Personal Assistant kamu 🤖")
 
-# HANDLE CHAT
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_text = update.message.text
     user = update.message.from_user
@@ -38,10 +36,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     else:
         name = user.first_name if user.first_name else "Teman"
 
-    # ambil history user
     history = user_memory.get(user_id, [])
-
-    # tambah input user
     history.append({"role": "user", "content": user_text})
 
     try:
@@ -52,6 +47,21 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
                     "role": "system",
                     "content": f"""
 You are a smart assistant helping {name}, a product manager.
+
+Context about user's boss:
+- Boss name: Neel (Niranjan Kumar)
+- Role: CTO
+- Personality:
+  - tends to think like a CPO (product mindset)
+  - prefers waterfall over agile
+  - often changes direction and can be difficult to work with
+
+If user asks about:
+- "bos saya"
+- "Neel"
+- "Niranjan"
+
+You should answer based on this context.
 
 Always format your answers:
 - Use bullet points
@@ -70,10 +80,8 @@ Always format your answers:
 
         reply = response.choices[0].message.content
 
-        # simpan jawaban AI ke memory
         history.append({"role": "assistant", "content": reply})
 
-        # limit memory (biar ga berat)
         user_memory[user_id] = history[-10:]
 
         MAX_LENGTH = 4000
@@ -87,7 +95,6 @@ Always format your answers:
         print("ERROR:", e)
         await update.message.reply_text("⚠️ Terjadi error, coba lagi ya.")
 
-# RUN BOT
 app = ApplicationBuilder().token(os.getenv("TELEGRAM_TOKEN")).build()
 
 app.add_handler(CommandHandler("start", start))
